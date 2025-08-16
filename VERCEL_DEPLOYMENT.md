@@ -2,27 +2,34 @@
 
 ## Issue Resolution
 
-The main issue was that Flask-SQLAlchemy was trying to create an instance directory in Vercel's read-only file system. This has been fixed by:
+The main issues were:
+1. **Flask-SQLAlchemy trying to create an instance directory** in Vercel's read-only file system
+2. **psycopg2-binary failing to build** due to missing PostgreSQL development libraries
+
+These have been fixed by:
 
 1. **Using in-memory SQLite**: The app now uses `sqlite:///:memory:` for Vercel deployments
-2. **Proper Flask configuration**: Added `SQLALCHEMY_ENGINE_OPTIONS` to prevent file system access
-3. **Error handling**: Added fallback configurations for SQLAlchemy initialization
-4. **Simplified app**: Created `app_vercel_simple.py` specifically for Vercel
+2. **Removing PostgreSQL dependencies**: Eliminated `psycopg2-binary` from requirements to avoid build failures
+3. **Proper Flask configuration**: Added `SQLALCHEMY_ENGINE_OPTIONS` to prevent file system access
+4. **Error handling**: Added fallback configurations for SQLAlchemy initialization
+5. **Simplified app**: Created `app_vercel_simple.py` specifically for Vercel
 
 ## Files Updated
 
 - ✅ `app_vercel_simple.py` - New simplified version for Vercel
 - ✅ `api/index.py` - Updated to use the simplified app
-- ✅ `requirements.txt` - Added PostgreSQL support
+- ✅ `requirements.txt` - Removed problematic dependencies
 - ✅ `requirements-vercel.txt` - Minimal requirements for Vercel
-- ✅ `vercel.json` - Proper configuration
+- ✅ `vercel.json` - Updated configuration
+- ✅ `test_vercel.py` - Test script for deployment verification
+- ✅ `VERCEL_DEPLOYMENT.md` - Updated troubleshooting guide
 
 ## Deployment Steps
 
 1. **Push your changes to GitHub**:
    ```bash
    git add .
-   git commit -m "Fix Vercel deployment issues"
+   git commit -m "Fix Vercel build: Remove psycopg2 dependency"
    git push
    ```
 
@@ -41,14 +48,20 @@ The main issue was that Flask-SQLAlchemy was trying to create an instance direct
 Make sure you have these environment variables set in Vercel:
 
 - `SECRET_KEY` - A random secret key for Flask sessions
-- `DATABASE_URL` - (Optional) PostgreSQL connection string
 - `VERCEL` - Set to "1" (automatically set by Vercel)
 
 ## Database Configuration
 
-- **Local development**: Uses SQLite file database
 - **Vercel deployment**: Uses in-memory SQLite (data is not persistent)
-- **Production**: Use PostgreSQL with `DATABASE_URL` environment variable
+- **Local development**: Can use SQLite file database or PostgreSQL
+- **Production**: For persistent data, consider using external database services
+
+## Important Notes
+
+- **Data persistence**: The in-memory SQLite database means data will be lost when the function restarts
+- **PostgreSQL support**: Removed from Vercel deployment to avoid build issues
+- **File uploads**: Not supported on Vercel (read-only file system)
+- **Sessions**: May not persist between function invocations
 
 ## Troubleshooting
 
@@ -58,13 +71,6 @@ If you still get errors:
 2. **Test health endpoint**: Visit `/health` to check database connection
 3. **Test simple endpoint**: Visit `/test` to verify Flask is running
 4. **Check requirements**: Ensure all dependencies are in `requirements.txt`
-
-## Notes
-
-- The in-memory SQLite database means data will be lost when the function restarts
-- For production use, set up a PostgreSQL database (Supabase, Neon, Railway, etc.)
-- File uploads are not supported on Vercel (read-only file system)
-- Sessions may not persist between function invocations
 
 ## Success Indicators
 

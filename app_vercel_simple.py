@@ -50,14 +50,9 @@ def get_database_url():
     """Get database URL with fallback to in-memory SQLite"""
     DATABASE_URL = os.environ.get('DATABASE_URL')
     if DATABASE_URL and 'postgresql://' in DATABASE_URL:
-        # Check if psycopg2 is available
-        try:
-            import psycopg2
-            print("✅ Configured for PostgreSQL database on Vercel")
-            return DATABASE_URL
-        except ImportError:
-            print("⚠️ PostgreSQL URL provided but psycopg2 not available, falling back to in-memory SQLite")
-            return 'sqlite:///:memory:'
+        # For Vercel, we'll use in-memory SQLite to avoid PostgreSQL build issues
+        print("⚠️ PostgreSQL URL provided but using in-memory SQLite for Vercel compatibility")
+        return 'sqlite:///:memory:'
     else:
         print("✅ Using in-memory SQLite database for Vercel")
         return 'sqlite:///:memory:'
