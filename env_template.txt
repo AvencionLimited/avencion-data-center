@@ -1,0 +1,23 @@
+# Avencion Data Center Environment Configuration
+# Copy this file to .env and configure your values
+
+# Flask Configuration
+SECRET_KEY=avencion-data-center-super-secret-key-2025
+FLASK_ENV=development
+FLASK_DEBUG=1
+
+# Database Configuration
+# For local development (SQLite) - This is what you're using now
+DATABASE_URL=sqlite:///db_manager.db
+
+# For production (PostgreSQL) - Uncomment and configure when deploying
+# DATABASE_URL=postgresql://username:password@localhost:5432/avencion_data_center
+
+# Upload Configuration
+MAX_CONTENT_LENGTH=52428800
+
+# Session Configuration
+PERMANENT_SESSION_LIFETIME=86400
+
+# Security Configuration
+# Add any additional security keys here 

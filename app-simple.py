@@ -10,7 +10,11 @@ import warnings
 import hashlib
 import secrets
 from collections import defaultdict
+from dotenv import load_dotenv
 warnings.filterwarnings('ignore', category=FutureWarning)
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Rate limiting for login attempts
 login_attempts = defaultdict(list)
