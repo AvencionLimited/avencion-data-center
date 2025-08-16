@@ -1,149 +1,184 @@
 #!/usr/bin/env python3
 """
-Vercel Deployment Helper Script
-This script helps validate your setup before deploying to Vercel.
+Vercel Deployment Helper Script for Avencion Data Center
 """
 
 import os
 import sys
+import subprocess
+import json
 from pathlib import Path
 
-def check_files():
-    """Check if all required files exist"""
-    required_files = [
-        'vercel.json',
-        'api/index.py',
-        'app_vercel.py',
-        'requirements-simple.txt',
-        'templates/base.html',
-        'templates/login.html',
-        'templates/index.html'
-    ]
+def check_prerequisites():
+    """Check if all prerequisites are met"""
+    print("🔍 Checking prerequisites...")
     
-    print("🔍 Checking required files...")
+    # Check if we're in the right directory
+    required_files = ['app_simple_working.py', 'api/index.py', 'vercel.json', 'requirements.txt']
     missing_files = []
     
-    for file_path in required_files:
-        if os.path.exists(file_path):
-            print(f"✅ {file_path}")
-        else:
-            print(f"❌ {file_path}")
-            missing_files.append(file_path)
+    for file in required_files:
+        if not Path(file).exists():
+            missing_files.append(file)
     
     if missing_files:
-        print(f"\n❌ Missing files: {', '.join(missing_files)}")
+        print(f"❌ Missing required files: {', '.join(missing_files)}")
         return False
     
-    print("✅ All required files found!")
-    return True
-
-def check_requirements():
-    """Check if requirements file has necessary dependencies"""
-    print("\n🔍 Checking requirements.txt...")
+    print("✅ All required files found")
     
-    if not os.path.exists('requirements-simple.txt'):
-        print("❌ requirements-simple.txt not found")
-        return False
-    
-    with open('requirements-simple.txt', 'r') as f:
-        content = f.read()
-    
-    required_packages = [
-        'Flask',
-        'Flask-SQLAlchemy',
-        'python-dotenv',
-        'psycopg2-binary'
-    ]
-    
-    missing_packages = []
-    for package in required_packages:
-        if package.lower() not in content.lower():
-            missing_packages.append(package)
-    
-    if missing_packages:
-        print(f"❌ Missing packages: {', '.join(missing_packages)}")
-        return False
-    
-    print("✅ All required packages found in requirements-simple.txt")
-    return True
-
-def check_vercel_config():
-    """Check Vercel configuration"""
-    print("\n🔍 Checking Vercel configuration...")
-    
-    if not os.path.exists('vercel.json'):
-        print("❌ vercel.json not found")
-        return False
-    
+    # Check if Vercel CLI is installed
     try:
-        import json
-        with open('vercel.json', 'r') as f:
-            config = json.load(f)
-        
-        required_keys = ['version', 'builds', 'routes']
-        missing_keys = []
-        
-        for key in required_keys:
-            if key not in config:
-                missing_keys.append(key)
-        
-        if missing_keys:
-            print(f"❌ Missing keys in vercel.json: {', '.join(missing_keys)}")
+        result = subprocess.run(['vercel', '--version'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"✅ Vercel CLI found: {result.stdout.strip()}")
+        else:
+            print("❌ Vercel CLI not found or not working")
+            print("   Install with: npm i -g vercel")
             return False
-        
-        print("✅ Vercel configuration looks good!")
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error reading vercel.json: {e}")
+    except FileNotFoundError:
+        print("❌ Vercel CLI not installed")
+        print("   Install with: npm i -g vercel")
         return False
+    
+    return True
 
-def check_app_import():
-    """Check if the app can be imported"""
-    print("\n🔍 Checking app import...")
+def check_environment_variables():
+    """Check if environment variables are set"""
+    print("\n🔍 Checking environment variables...")
+    
+    # Check for .env file
+    if Path('.env').exists():
+        print("✅ .env file found")
+        return True
+    
+    # Check for environment variables
+    required_vars = ['SECRET_KEY', 'DATABASE_URL']
+    missing_vars = []
+    
+    for var in required_vars:
+        if not os.environ.get(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        print(f"⚠️  Missing environment variables: {', '.join(missing_vars)}")
+        print("   These will need to be set in Vercel dashboard after deployment")
+        return False
+    
+    print("✅ Environment variables found")
+    return True
+
+def create_env_template():
+    """Create a template .env file"""
+    print("\n📝 Creating .env template...")
+    
+    env_content = """# Avencion Data Center Environment Configuration
+# Copy this file to .env and configure your values
+
+# Flask Configuration
+SECRET_KEY=your-super-secret-key-here
+FLASK_ENV=production
+FLASK_DEBUG=0
+
+# Database Configuration
+# For PostgreSQL (recommended for production)
+DATABASE_URL=postgresql://username:password@host:port/database
+
+# For SQLite (development only)
+# DATABASE_URL=sqlite:///db_manager.db
+
+# Upload Configuration
+MAX_CONTENT_LENGTH=52428800
+
+# Session Configuration
+PERMANENT_SESSION_LIFETIME=86400
+"""
+    
+    with open('.env.template', 'w') as f:
+        f.write(env_content)
+    
+    print("✅ Created .env.template file")
+    print("   Copy this to .env and configure your values")
+
+def test_app_locally():
+    """Test the app locally"""
+    print("\n🧪 Testing app locally...")
     
     try:
-        # Add current directory to path
-        sys.path.insert(0, os.getcwd())
+        # Test if the app can be imported
+        sys.path.append('.')
+        from app_simple_working import app
         
-        # Try to import the app
-        from app_vercel import app
-        print("✅ App imports successfully!")
+        with app.app_context():
+            from app_simple_working import db
+            db.create_all()
+        
+        print("✅ App imports successfully")
+        print("✅ Database tables can be created")
         return True
         
     except Exception as e:
-        print(f"❌ Error importing app: {e}")
+        print(f"❌ App test failed: {e}")
+        return False
+
+def deploy_to_vercel():
+    """Deploy to Vercel"""
+    print("\n🚀 Deploying to Vercel...")
+    
+    try:
+        # Run vercel command
+        result = subprocess.run(['vercel', '--prod'], capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print("✅ Deployment successful!")
+            print(result.stdout)
+            return True
+        else:
+            print("❌ Deployment failed!")
+            print(result.stderr)
+            return False
+            
+    except Exception as e:
+        print(f"❌ Deployment error: {e}")
         return False
 
 def main():
-    """Main validation function"""
-    print("🚀 Vercel Deployment Validation")
-    print("=" * 40)
+    """Main deployment process"""
+    print("🚀 Avencion Data Center - Vercel Deployment Helper")
+    print("=" * 50)
     
-    checks = [
-        check_files,
-        check_requirements,
-        check_vercel_config,
-        check_app_import
-    ]
+    # Check prerequisites
+    if not check_prerequisites():
+        print("\n❌ Prerequisites not met. Please fix the issues above.")
+        return
     
-    all_passed = True
-    for check in checks:
-        if not check():
-            all_passed = False
+    # Check environment variables
+    check_environment_variables()
     
-    print("\n" + "=" * 40)
-    if all_passed:
-        print("🎉 All checks passed! Your project is ready for Vercel deployment.")
-        print("\nNext steps:")
-        print("1. Set up a PostgreSQL database (Supabase, Neon, etc.)")
-        print("2. Add environment variables in Vercel dashboard:")
-        print("   - DATABASE_URL")
-        print("   - SECRET_KEY")
-        print("3. Deploy using: vercel")
+    # Create env template if needed
+    if not Path('.env').exists():
+        create_env_template()
+    
+    # Test app locally
+    if not test_app_locally():
+        print("\n❌ Local test failed. Please fix the issues before deploying.")
+        return
+    
+    # Ask user if they want to deploy
+    print("\n" + "=" * 50)
+    response = input("Ready to deploy to Vercel? (y/N): ").lower().strip()
+    
+    if response in ['y', 'yes']:
+        deploy_to_vercel()
     else:
-        print("❌ Some checks failed. Please fix the issues above before deploying.")
-        sys.exit(1)
+        print("\n📋 Manual deployment steps:")
+        print("1. Run: vercel login")
+        print("2. Run: vercel")
+        print("3. Follow the prompts")
+        print("4. Set environment variables in Vercel dashboard")
+        print("5. Run: vercel --prod")
+    
+    print("\n📚 For more information, see VERCEL_DEPLOYMENT.md")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main() 

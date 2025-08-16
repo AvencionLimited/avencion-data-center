@@ -1,157 +1,222 @@
-# Database Manager - Flask Application
+# Avencion Data Center
 
-A Flask-based web application for managing projects, cohorts, and databases. This application provides a comprehensive interface for data management with authentication and user-friendly features.
+A Flask-based web application for managing database projects and cohorts.
 
 ## Features
 
-- **Project Management**: Create and manage projects with different types
+- **Project Management**: Create and manage data projects
 - **Cohort Management**: Organize data into cohorts within projects
-- **User Authentication**: Secure login system with rate limiting
-- **Database Integration**: Support for PostgreSQL databases
-- **Responsive UI**: Modern interface built with Tailwind CSS
+- **Database Integration**: Support for PostgreSQL and SQLite databases
+- **Authentication**: Secure login system
+- **File Upload**: Support for Excel and Access database files
+- **Web Interface**: Modern, responsive web interface
 
-## Quick Deploy to Vercel
+## Quick Start
 
-### Prerequisites
-1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
-2. **PostgreSQL Database**: Set up a database (recommended: [Supabase](https://supabase.com) or [Neon](https://neon.tech))
+### Local Development
 
-### Deployment Steps
-
-1. **Fork/Clone this repository**
-
-2. **Set up a PostgreSQL database**:
-   - Go to [supabase.com](https://supabase.com) and create a free project
-   - Copy your database connection string
-
-3. **Deploy to Vercel**:
-   ```bash
-   # Install Vercel CLI
-   npm i -g vercel
-   
-   # Login to Vercel
-   vercel login
-   
-   # Deploy
-   vercel
-   ```
-
-4. **Configure Environment Variables** in Vercel dashboard:
-   ```
-   DATABASE_URL=postgresql://username:password@host:port/database
-   SECRET_KEY=your-secret-key-here
-   FLASK_ENV=production
-   FLASK_DEBUG=0
-   ```
-
-5. **Access your app** at `https://your-project-name.vercel.app`
-
-### Default Login Credentials
-- **Username**: `Avencion`
-- **Password**: `AvencionData@Center2025`
-
-## Local Development
-
-### Setup
-
-1. **Clone the repository**:
+1. **Clone the repository**
    ```bash
    git clone <your-repo-url>
    cd Databases
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies**
    ```bash
-   pip install -r requirements-simple.txt
+   pip install -r requirements.txt
    ```
 
-3. **Set up environment variables**:
-   Create a `.env` file with:
-   ```
-   DATABASE_URL=postgresql://username:password@host:port/database
-   SECRET_KEY=your-secret-key-here
-   ```
-
-4. **Run the application**:
+3. **Set up environment variables**
    ```bash
-   python app_vercel.py
+   cp env_template.txt .env
+   # Edit .env with your configuration
    ```
 
-5. **Access the app** at `http://localhost:5000`
+4. **Run the application**
+   ```bash
+   python app_simple_working.py
+   ```
 
-## Project Structure
+5. **Access the application**
+   - Open http://localhost:5000
+   - Login with: Username: `Avencion`, Password: `AvencionData@Center2025`
+
+## Vercel Deployment
+
+### Prerequisites
+
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **Vercel CLI**: Install with `npm i -g vercel`
+3. **Database**: Set up a PostgreSQL database (recommended options below)
+
+### Database Setup
+
+#### Option 1: Vercel PostgreSQL (Recommended)
+1. Go to your Vercel dashboard
+2. Create a new PostgreSQL database
+3. Copy the connection string
+4. Add it as an environment variable: `DATABASE_URL`
+
+#### Option 2: External PostgreSQL Services
+- [Supabase](https://supabase.com) - Free tier available
+- [Neon](https://neon.tech) - Free tier available
+- [Railway](https://railway.app) - Free tier available
+- [Heroku Postgres](https://heroku.com/postgres)
+
+### Deployment Steps
+
+1. **Install Vercel CLI**
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Login to Vercel**
+   ```bash
+   vercel login
+   ```
+
+3. **Deploy the application**
+   ```bash
+   vercel
+   ```
+
+4. **Set environment variables in Vercel dashboard**
+   - `SECRET_KEY`: A random secret key for Flask sessions
+   - `DATABASE_URL`: Your PostgreSQL connection string
+   - `FLASK_ENV`: Set to "production"
+   - `FLASK_DEBUG`: Set to "0"
+
+5. **Redeploy with environment variables**
+   ```bash
+   vercel --prod
+   ```
+
+### Automated Deployment
+
+Use the provided deployment helper script:
+
+```bash
+python deploy-vercel.py
+```
+
+This script will:
+- Check prerequisites
+- Validate your setup
+- Guide you through deployment
+- Test the deployment
+
+### Testing Your Deployment
+
+Use the test script to verify everything works:
+
+```bash
+python test_vercel.py
+```
+
+Or manually test these endpoints:
+- Health check: `https://your-app.vercel.app/health`
+- Database test: `https://your-app.vercel.app/test-db`
+- Main app: `https://your-app.vercel.app/`
+
+## Environment Variables
+
+### Required
+- `SECRET_KEY`: Secret key for Flask sessions
+- `DATABASE_URL`: PostgreSQL connection string
+
+### Optional
+- `FLASK_ENV`: Environment (development/production)
+- `FLASK_DEBUG`: Debug mode (0/1)
+- `MAX_CONTENT_LENGTH`: Maximum file upload size
+- `PERMANENT_SESSION_LIFETIME`: Session timeout in seconds
+
+## Database Configuration
+
+The application automatically handles database connections:
+
+- **PostgreSQL**: If `DATABASE_URL` contains `postgresql://`
+- **SQLite**: Fallback for development (not recommended for production)
+
+### Connection String Format
+```
+postgresql://username:password@host:port/database
+```
+
+## File Structure
 
 ```
-Databases/
+/
 ├── api/
 │   └── index.py              # Vercel entry point
-├── templates/                # HTML templates
-├── app_vercel.py            # Main Flask application (Vercel-compatible)
-├── app_simple.py            # Full-featured Flask application
-├── requirements-simple.txt   # Python dependencies
+├── templates/                # Flask templates
+├── static/                   # Static files
+├── uploads/                  # File uploads (local only)
+├── app_simple_working.py     # Main Flask application
+├── requirements.txt          # Python dependencies
 ├── vercel.json              # Vercel configuration
-├── deploy-vercel.py         # Deployment validation script
-└── VERCEL_DEPLOYMENT.md     # Detailed deployment guide
+├── deploy-vercel.py         # Deployment helper script
+├── test_vercel.py           # Test script
+└── README.md                # This file
 ```
-
-## Features Available on Vercel
-
-✅ **Project Management**: Create, edit, and delete projects
-✅ **Cohort Management**: Organize data into cohorts
-✅ **User Authentication**: Secure login with session management
-✅ **Database Integration**: PostgreSQL database support
-✅ **Health Check**: `/health` endpoint for monitoring
-
-❌ **File Uploads**: Not supported on Vercel (read-only file system)
-❌ **Excel Processing**: Requires file system access
-
-## Database Setup
-
-The application automatically creates the necessary database tables on first run. Make sure your PostgreSQL database is accessible and the connection string is correctly configured.
-
-## Security Features
-
-- **Rate Limiting**: Prevents brute force attacks on login
-- **Session Management**: Secure session handling with expiration
-- **Input Validation**: Sanitized user inputs
-- **Security Headers**: XSS protection and other security headers
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Database Connection Error**
-   - Verify your `DATABASE_URL` environment variable
-   - Ensure your database allows external connections
+1. **Database Connection Errors**
+   - Verify your `DATABASE_URL` format
+   - Ensure database is accessible from Vercel
    - Check database credentials
 
-2. **Build Failures**
-   - Check Vercel build logs
-   - Verify all dependencies are in `requirements-simple.txt`
+2. **Import Errors**
+   - Ensure all dependencies are in `requirements.txt`
+   - Check that `api/index.py` can import your app
 
-3. **Runtime Errors**
-   - Check Vercel function logs
-   - Verify environment variables are set correctly
+3. **Timeout Errors**
+   - Database operations might be slow on first connection
+   - Consider connection pooling for production
 
-### Validation
+4. **File Upload Issues**
+   - Vercel has limitations on file uploads
+   - Consider external storage (AWS S3, Cloudinary)
 
-Run the deployment validation script to check your setup:
+### Debug Commands
+
 ```bash
-python deploy-vercel.py
+# View deployment logs
+vercel logs
+
+# Test locally
+vercel dev
+
+# Check environment variables
+vercel env ls
+
+# Redeploy
+vercel --prod
 ```
 
-## Contributing
+## Security Considerations
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
+1. **Environment Variables**: Never commit sensitive data
+2. **Database Security**: Use strong passwords and restrict access
+3. **HTTPS**: Vercel automatically provides HTTPS
+4. **Rate Limiting**: Consider implementing rate limiting
 
 ## Support
 
-For deployment issues, refer to the [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) file for detailed instructions. 
+If you encounter issues:
+
+1. Check the Vercel deployment logs
+2. Test your app locally with `vercel dev`
+3. Verify your environment variables
+4. Check the `/health` and `/test-db` endpoints
+5. Review the `VERCEL_DEPLOYMENT.md` file for detailed troubleshooting
+
+## License
+
+This project is proprietary to Avencion.
+
+## Contributing
+
+For internal development and contributions, please follow the established coding standards and testing procedures. 

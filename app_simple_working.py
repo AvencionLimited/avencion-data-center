@@ -284,7 +284,9 @@ def test_database():
     try:
         with app.app_context():
             db.create_all()
-            db.engine.execute('SELECT 1')
+            # Use text() for raw SQL in newer SQLAlchemy versions
+            from sqlalchemy import text
+            db.session.execute(text('SELECT 1'))
             project_count = Project.query.count()
             return jsonify({
                 'status': 'success',
@@ -307,7 +309,9 @@ def health_check():
     try:
         with app.app_context():
             db.create_all()
-            db.engine.execute('SELECT 1')
+            # Use text() for raw SQL in newer SQLAlchemy versions
+            from sqlalchemy import text
+            db.session.execute(text('SELECT 1'))
         return jsonify({
             'status': 'healthy', 
             'timestamp': datetime.utcnow().isoformat(),
