@@ -45,20 +45,6 @@ def login_required(f):
     decorated_function.__name__ = f.__name__
     return decorated_function
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Session expires in 24 hours
-
-# Security headers
-@app.after_request
-def add_security_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    return response
-
 # Initialize database configuration
 def get_database_url():
     """Get database URL with fallback to SQLite"""
@@ -75,6 +61,28 @@ def get_database_url():
     else:
         print("✅ Using SQLite database for local development")
         return 'sqlite:///db_manager.db'
+
+# Create Flask app with proper configuration for Vercel
+app = Flask(__name__)
+
+# Configure Flask for Vercel's read-only file system
+if os.environ.get('VERCEL'):
+    # Use /tmp for writable files on Vercel
+    app.config['INSTANCE_PATH'] = '/tmp'
+    print("✅ Configured for Vercel's read-only file system")
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Session expires in 24 hours
+
+# Security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 # Set database URL
 app.config['SQLALCHEMY_DATABASE_URI'] = get_database_url()
