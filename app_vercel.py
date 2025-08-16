@@ -8,6 +8,7 @@ import hashlib
 import secrets
 from collections import defaultdict
 from dotenv import load_dotenv
+import traceback
 warnings.filterwarnings('ignore', category=FutureWarning)
 
 # Load environment variables from .env file
@@ -93,118 +94,193 @@ class Cohort(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+# Error handler for debugging
+@app.errorhandler(500)
+def internal_error(error):
+    app.logger.error(f'Server Error: {error}')
+    app.logger.error(f'Traceback: {traceback.format_exc()}')
+    return jsonify({'error': 'Internal server error', 'details': str(error)}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f'Unhandled Exception: {e}')
+    app.logger.error(f'Traceback: {traceback.format_exc()}')
+    return jsonify({'error': 'An error occurred', 'details': str(e)}), 500
+
 # Authentication routes
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        # Rate limiting check
-        client_ip = request.remote_addr
-        current_time = datetime.utcnow()
-        
-        # Clean old attempts
-        login_attempts[client_ip] = [attempt for attempt in login_attempts[client_ip] 
-                                   if current_time - attempt < timedelta(seconds=LOGIN_TIMEOUT)]
-        
-        # Check if too many attempts
-        if len(login_attempts[client_ip]) >= MAX_LOGIN_ATTEMPTS:
-            flash('Too many login attempts. Please try again later.', 'error')
-            return render_template('login.html')
-        
-        # Verify credentials
-        if username == AVENCION_USERNAME and hashlib.sha256(password.encode()).hexdigest() == AVENCION_PASSWORD_HASH:
-            # Clear login attempts on successful login
-            login_attempts[client_ip].clear()
+    try:
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
             
-            session.permanent = True
-            session['authenticated'] = True
-            session['username'] = username
-            session['login_time'] = current_time.isoformat()
-            session['session_id'] = secrets.token_hex(16)
-            session['ip_address'] = client_ip
+            # Rate limiting check
+            client_ip = request.remote_addr
+            current_time = datetime.utcnow()
             
-            flash('Welcome to Avencion Data Center!', 'success')
-            return redirect(url_for('index'))
-        else:
-            # Record failed attempt
-            login_attempts[client_ip].append(current_time)
-            flash('Invalid credentials. Please try again.', 'error')
-    
-    return render_template('login.html')
+            # Clean old attempts
+            login_attempts[client_ip] = [attempt for attempt in login_attempts[client_ip] 
+                                       if current_time - attempt < timedelta(seconds=LOGIN_TIMEOUT)]
+            
+            # Check if too many attempts
+            if len(login_attempts[client_ip]) >= MAX_LOGIN_ATTEMPTS:
+                flash('Too many login attempts. Please try again later.', 'error')
+                return render_template('login.html')
+            
+            # Verify credentials
+            if username == AVENCION_USERNAME and hashlib.sha256(password.encode()).hexdigest() == AVENCION_PASSWORD_HASH:
+                # Clear login attempts on successful login
+                login_attempts[client_ip].clear()
+                
+                session.permanent = True
+                session['authenticated'] = True
+                session['username'] = username
+                session['login_time'] = current_time.isoformat()
+                session['session_id'] = secrets.token_hex(16)
+                session['ip_address'] = client_ip
+                
+                flash('Welcome to Avencion Data Center!', 'success')
+                return redirect(url_for('index'))
+            else:
+                # Record failed attempt
+                login_attempts[client_ip].append(current_time)
+                flash('Invalid credentials. Please try again.', 'error')
+        
+        return render_template('login.html')
+    except Exception as e:
+        app.logger.error(f'Login error: {e}')
+        return jsonify({'error': 'Login error', 'details': str(e)}), 500
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    flash('You have been logged out successfully.', 'success')
-    return redirect(url_for('login'))
+    try:
+        session.clear()
+        flash('You have been logged out successfully.', 'success')
+        return redirect(url_for('login'))
+    except Exception as e:
+        app.logger.error(f'Logout error: {e}')
+        return jsonify({'error': 'Logout error', 'details': str(e)}), 500
 
 # Main routes
 @app.route('/')
 @login_required
 def index():
-    projects = Project.query.order_by(Project.created_at.desc()).all()
-    return render_template('index.html', projects=projects)
+    try:
+        with app.app_context():
+            projects = Project.query.order_by(Project.created_at.desc()).all()
+        return render_template('index.html', projects=projects)
+    except Exception as e:
+        app.logger.error(f'Index error: {e}')
+        return jsonify({'error': 'Index error', 'details': str(e)}), 500
 
 @app.route('/project/new', methods=['GET', 'POST'])
 @login_required
 def new_project():
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        project_type = request.form['project_type']
-        created_by = request.form.get('created_by', 'Avencion')
+    try:
+        if request.method == 'POST':
+            name = request.form['name']
+            description = request.form['description']
+            project_type = request.form['project_type']
+            created_by = request.form.get('created_by', 'Avencion')
+            
+            with app.app_context():
+                project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
+                db.session.add(project)
+                db.session.commit()
+            
+            flash('Project created successfully!', 'success')
+            return redirect(url_for('index'))
         
-        project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
-        db.session.add(project)
-        db.session.commit()
-        
-        flash('Project created successfully!', 'success')
-        return redirect(url_for('index'))
-    
-    return render_template('new_project.html')
+        return render_template('new_project.html')
+    except Exception as e:
+        app.logger.error(f'New project error: {e}')
+        return jsonify({'error': 'New project error', 'details': str(e)}), 500
 
 @app.route('/project/<int:project_id>')
 @login_required
 def project_detail(project_id):
-    project = Project.query.get_or_404(project_id)
-    return render_template('project_detail.html', project=project)
+    try:
+        with app.app_context():
+            project = Project.query.get_or_404(project_id)
+        return render_template('project_detail.html', project=project)
+    except Exception as e:
+        app.logger.error(f'Project detail error: {e}')
+        return jsonify({'error': 'Project detail error', 'details': str(e)}), 500
 
 @app.route('/cohort/new/<int:project_id>', methods=['GET', 'POST'])
 @login_required
 def new_cohort(project_id):
-    project = Project.query.get_or_404(project_id)
-    
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        created_by = request.form.get('created_by', 'Avencion')
+    try:
+        with app.app_context():
+            project = Project.query.get_or_404(project_id)
         
-        cohort = Cohort(name=name, description=description, project_id=project_id, created_by=created_by)
-        db.session.add(cohort)
-        db.session.commit()
+        if request.method == 'POST':
+            name = request.form['name']
+            description = request.form['description']
+            created_by = request.form.get('created_by', 'Avencion')
+            
+            with app.app_context():
+                cohort = Cohort(name=name, description=description, project_id=project_id, created_by=created_by)
+                db.session.add(cohort)
+                db.session.commit()
+            
+            flash('Cohort created successfully!', 'success')
+            return redirect(url_for('project_detail', project_id=project_id))
         
-        flash('Cohort created successfully!', 'success')
-        return redirect(url_for('project_detail', project_id=project_id))
-    
-    return render_template('new_cohort.html', project=project)
+        return render_template('new_cohort.html', project=project)
+    except Exception as e:
+        app.logger.error(f'New cohort error: {e}')
+        return jsonify({'error': 'New cohort error', 'details': str(e)}), 500
 
 @app.route('/cohort/<int:cohort_id>')
 @login_required
 def cohort_detail(cohort_id):
-    cohort = Cohort.query.get_or_404(cohort_id)
-    return render_template('cohort_detail.html', cohort=cohort)
+    try:
+        with app.app_context():
+            cohort = Cohort.query.get_or_404(cohort_id)
+        return render_template('cohort_detail.html', cohort=cohort)
+    except Exception as e:
+        app.logger.error(f'Cohort detail error: {e}')
+        return jsonify({'error': 'Cohort detail error', 'details': str(e)}), 500
 
 @app.route('/help')
 @login_required
 def help_page():
-    return render_template('help.html')
+    try:
+        return render_template('help.html')
+    except Exception as e:
+        app.logger.error(f'Help error: {e}')
+        return jsonify({'error': 'Help error', 'details': str(e)}), 500
 
 # Health check for Vercel
 @app.route('/health')
 def health_check():
-    return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+    try:
+        # Test database connection
+        with app.app_context():
+            db.engine.execute('SELECT 1')
+        return jsonify({
+            'status': 'healthy', 
+            'timestamp': datetime.utcnow().isoformat(),
+            'database': 'connected'
+        })
+    except Exception as e:
+        app.logger.error(f'Health check error: {e}')
+        return jsonify({
+            'status': 'unhealthy', 
+            'timestamp': datetime.utcnow().isoformat(),
+            'error': str(e)
+        }), 500
+
+# Simple test route without database
+@app.route('/test')
+def test():
+    return jsonify({
+        'status': 'ok',
+        'message': 'Flask app is running',
+        'timestamp': datetime.utcnow().isoformat()
+    })
 
 # For Vercel deployment
 app.debug = False
