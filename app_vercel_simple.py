@@ -100,20 +100,23 @@ def add_security_headers(response):
 app.config['SQLALCHEMY_DATABASE_URI'] = get_database_url()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Database initialization function
+def init_database_tables():
+    """Initialize database tables when needed"""
+    try:
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created successfully")
+            return True
+    except Exception as e:
+        print(f"⚠️ Database table creation error: {e}")
+        print("🔄 Continuing without database tables")
+        return False
+
 # Initialize SQLAlchemy with proper error handling for Vercel
 try:
     db = SQLAlchemy(app)
     print("✅ SQLAlchemy initialized successfully")
-    
-    # Create tables immediately after initialization
-    with app.app_context():
-        try:
-            db.create_all()
-            print("✅ Database tables created successfully")
-        except Exception as e:
-            print(f"⚠️ Database table creation error: {e}")
-            print("🔄 Continuing without database tables")
-            
 except Exception as e:
     print(f"⚠️ SQLAlchemy initialization error: {e}")
     # Fallback: try to initialize without instance path
@@ -121,14 +124,6 @@ except Exception as e:
         app.config['INSTANCE_PATH'] = None
         db = SQLAlchemy(app)
         print("✅ SQLAlchemy initialized with fallback configuration")
-        
-        # Create tables with fallback configuration
-        with app.app_context():
-            try:
-                db.create_all()
-                print("✅ Database tables created with fallback configuration")
-            except Exception as e2:
-                print(f"⚠️ Fallback database table creation error: {e2}")
     else:
         raise e
 
@@ -226,11 +221,8 @@ def logout():
 def index():
     try:
         with app.app_context():
-            # Ensure tables exist before querying
-            try:
-                db.create_all()
-            except:
-                pass
+            # Initialize database tables if needed
+            init_database_tables()
             
             # Use eager loading to prevent lazy loading issues
             projects = Project.query.options(db.joinedload(Project.cohorts)).order_by(Project.created_at.desc()).all()
@@ -250,11 +242,8 @@ def new_project():
             created_by = request.form.get('created_by', 'Avencion')
             
             with app.app_context():
-                # Ensure tables exist before using them
-                try:
-                    db.create_all()
-                except:
-                    pass
+                # Initialize database tables if needed
+                init_database_tables()
                 
                 project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
                 db.session.add(project)
