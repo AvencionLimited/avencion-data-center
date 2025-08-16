@@ -47,15 +47,26 @@ def login_required(f):
 
 # Initialize database configuration
 def get_database_url():
-    """Get database URL with fallback to in-memory SQLite"""
+    """Get database URL with proper fallback"""
     DATABASE_URL = os.environ.get('DATABASE_URL')
-    if DATABASE_URL and 'postgresql://' in DATABASE_URL:
-        # For Vercel, we'll use in-memory SQLite to avoid PostgreSQL build issues
-        print("⚠️ PostgreSQL URL provided but using in-memory SQLite for Vercel compatibility")
-        return 'sqlite:///:memory:'
+    
+    if DATABASE_URL:
+        if 'postgresql://' in DATABASE_URL:
+            # Check if we can use PostgreSQL
+            try:
+                import psycopg2
+                print("✅ Using PostgreSQL database from environment")
+                return DATABASE_URL
+            except ImportError:
+                print("⚠️ PostgreSQL URL provided but psycopg2 not available, using SQLite file")
+                return 'sqlite:///db_manager.db'
+        else:
+            print("✅ Using database URL from environment")
+            return DATABASE_URL
     else:
-        print("✅ Using in-memory SQLite database for Vercel")
-        return 'sqlite:///:memory:'
+        # Fallback to SQLite file for local development
+        print("✅ Using SQLite file database for local development")
+        return 'sqlite:///db_manager.db'
 
 # Create Flask app with proper configuration for Vercel
 app = Flask(__name__)
