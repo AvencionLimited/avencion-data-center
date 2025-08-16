@@ -6,10 +6,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ['VERCEL'] = '1'
 
 try:
-    from app_vercel_simple import app
-    print("✅ Successfully imported app_vercel_simple")
+    from app_simple_working import app
+    print("✅ Successfully imported app_simple_working")
 except Exception as e:
-    print(f"⚠️ Error importing app_vercel_simple: {e}")
+    print(f"⚠️ Error importing app_simple_working: {e}")
     # Fallback: try to import the main app
     try:
         from app_vercel import app
