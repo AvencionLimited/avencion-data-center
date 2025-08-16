@@ -353,6 +353,45 @@ def edit_spreadsheet_online(spreadsheet_id):
         app.logger.error(f'Edit spreadsheet online error: {e}')
         return jsonify({'error': 'Edit spreadsheet online error', 'details': str(e)}), 500
 
+# Database routes (simplified for Vercel)
+@app.route('/database/new/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+def new_database(project_id):
+    try:
+        with app.app_context():
+            project = Project.query.get_or_404(project_id)
+        
+        if request.method == 'POST':
+            flash('Database creation not available in simplified version', 'info')
+            return redirect(url_for('project_detail', project_id=project_id))
+        
+        return render_template('new_database.html', project=project)
+    except Exception as e:
+        app.logger.error(f'New database error: {e}')
+        return jsonify({'error': 'New database error', 'details': str(e)}), 500
+
+@app.route('/database/<int:database_id>/tables')
+@login_required
+def database_tables(database_id):
+    try:
+        # For simplified version, return empty tables list
+        return jsonify({'tables': []})
+    except Exception as e:
+        app.logger.error(f'Database tables error: {e}')
+        return jsonify({'error': 'Database tables error', 'details': str(e)}), 500
+
+@app.route('/database/<int:database_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_database(database_id):
+    try:
+        with app.app_context():
+            # For simplified version, just redirect to project detail
+            flash('Database editing not available in simplified version', 'info')
+            return redirect(url_for('project_detail', project_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Edit database error: {e}')
+        return jsonify({'error': 'Edit database error', 'details': str(e)}), 500
+
 @app.route('/help')
 @login_required
 def help_page():
@@ -380,6 +419,39 @@ def health_check():
             'status': 'unhealthy', 
             'timestamp': datetime.utcnow().isoformat(),
             'error': str(e)
+        }), 500
+
+# Database connection test route
+@app.route('/test-db')
+def test_database():
+    try:
+        with app.app_context():
+            # Test database connection
+            db.engine.execute('SELECT 1')
+            
+            # Check if tables exist
+            inspector = db.inspect(db.engine)
+            tables = inspector.get_table_names()
+            
+            # Try to query projects
+            project_count = Project.query.count()
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Database connection successful',
+                'database_url': app.config['SQLALCHEMY_DATABASE_URI'].replace('://', '://***:***@') if '@' in app.config['SQLALCHEMY_DATABASE_URI'] else app.config['SQLALCHEMY_DATABASE_URI'],
+                'tables': tables,
+                'project_count': project_count,
+                'timestamp': datetime.utcnow().isoformat()
+            })
+    except Exception as e:
+        app.logger.error(f'Database test error: {e}')
+        return jsonify({
+            'status': 'error',
+            'message': 'Database connection failed',
+            'error': str(e),
+            'database_url': app.config['SQLALCHEMY_DATABASE_URI'].replace('://', '://***:***@') if '@' in app.config['SQLALCHEMY_DATABASE_URI'] else app.config['SQLALCHEMY_DATABASE_URI'],
+            'timestamp': datetime.utcnow().isoformat()
         }), 500
 
 # Simple test route without database
