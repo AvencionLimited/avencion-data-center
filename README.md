@@ -200,6 +200,11 @@ CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
 - Verify file format
 - Ensure upload directory permissions
 
+## CREDENTIALS
+
+- USERNAME: Avencion
+- PASSWORD: AvencionData@Center2025
+
 ## Contributing
 
 1. Fork the repository
