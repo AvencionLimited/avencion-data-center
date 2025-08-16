@@ -58,9 +58,9 @@ def add_security_headers(response):
     response.headers['Pragma'] = 'no-cache'
     return response
 
-# Use PostgreSQL for Vercel deployment
+# Use PostgreSQL for Vercel deployment, fallback to SQLite
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
+if DATABASE_URL and 'postgresql://' in DATABASE_URL:
     # For Vercel deployment, use the DATABASE_URL directly
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
     print("✅ Configured for PostgreSQL database on Vercel")
