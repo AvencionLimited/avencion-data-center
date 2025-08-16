@@ -1,0 +1,215 @@
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+import os
+from datetime import datetime, timedelta
+import json
+import warnings
+import hashlib
+import secrets
+from collections import defaultdict
+from dotenv import load_dotenv
+warnings.filterwarnings('ignore', category=FutureWarning)
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Rate limiting for login attempts
+login_attempts = defaultdict(list)
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_TIMEOUT = 300  # 5 minutes
+
+# Custom JSON encoder to handle datetime objects
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
+
+# Authentication configuration
+AVENCION_USERNAME = "Avencion"
+AVENCION_PASSWORD_HASH = hashlib.sha256("AvencionData@Center2025".encode()).hexdigest()
+
+def login_required(f):
+    """Decorator to require authentication for routes"""
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        
+        # Additional session validation
+        if not session.get('session_id') or not session.get('username'):
+            session.clear()
+            return redirect(url_for('login'))
+        
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Session expires in 24 hours
+
+# Security headers
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
+
+# Use PostgreSQL for Vercel deployment
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    # For Vercel deployment, use the DATABASE_URL directly
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+    print("✅ Configured for PostgreSQL database on Vercel")
+else:
+    # Fallback to SQLite for local development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
+    print("✅ Using SQLite database for local development")
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Models
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    project_type = db.Column(db.String(50), nullable=False, default='other')
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    cohorts = db.relationship('Cohort', backref='project', lazy=True, cascade='all, delete-orphan')
+
+class Cohort(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+# Authentication routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
+        # Rate limiting check
+        client_ip = request.remote_addr
+        current_time = datetime.utcnow()
+        
+        # Clean old attempts
+        login_attempts[client_ip] = [attempt for attempt in login_attempts[client_ip] 
+                                   if current_time - attempt < timedelta(seconds=LOGIN_TIMEOUT)]
+        
+        # Check if too many attempts
+        if len(login_attempts[client_ip]) >= MAX_LOGIN_ATTEMPTS:
+            flash('Too many login attempts. Please try again later.', 'error')
+            return render_template('login.html')
+        
+        # Verify credentials
+        if username == AVENCION_USERNAME and hashlib.sha256(password.encode()).hexdigest() == AVENCION_PASSWORD_HASH:
+            # Clear login attempts on successful login
+            login_attempts[client_ip].clear()
+            
+            session.permanent = True
+            session['authenticated'] = True
+            session['username'] = username
+            session['login_time'] = current_time.isoformat()
+            session['session_id'] = secrets.token_hex(16)
+            session['ip_address'] = client_ip
+            
+            flash('Welcome to Avencion Data Center!', 'success')
+            return redirect(url_for('index'))
+        else:
+            # Record failed attempt
+            login_attempts[client_ip].append(current_time)
+            flash('Invalid credentials. Please try again.', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out successfully.', 'success')
+    return redirect(url_for('login'))
+
+# Main routes
+@app.route('/')
+@login_required
+def index():
+    projects = Project.query.order_by(Project.created_at.desc()).all()
+    return render_template('index.html', projects=projects)
+
+@app.route('/project/new', methods=['GET', 'POST'])
+@login_required
+def new_project():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        project_type = request.form['project_type']
+        created_by = request.form.get('created_by', 'Avencion')
+        
+        project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
+        db.session.add(project)
+        db.session.commit()
+        
+        flash('Project created successfully!', 'success')
+        return redirect(url_for('index'))
+    
+    return render_template('new_project.html')
+
+@app.route('/project/<int:project_id>')
+@login_required
+def project_detail(project_id):
+    project = Project.query.get_or_404(project_id)
+    return render_template('project_detail.html', project=project)
+
+@app.route('/cohort/new/<int:project_id>', methods=['GET', 'POST'])
+@login_required
+def new_cohort(project_id):
+    project = Project.query.get_or_404(project_id)
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        created_by = request.form.get('created_by', 'Avencion')
+        
+        cohort = Cohort(name=name, description=description, project_id=project_id, created_by=created_by)
+        db.session.add(cohort)
+        db.session.commit()
+        
+        flash('Cohort created successfully!', 'success')
+        return redirect(url_for('project_detail', project_id=project_id))
+    
+    return render_template('new_cohort.html', project=project)
+
+@app.route('/cohort/<int:cohort_id>')
+@login_required
+def cohort_detail(cohort_id):
+    cohort = Cohort.query.get_or_404(cohort_id)
+    return render_template('cohort_detail.html', cohort=cohort)
+
+@app.route('/help')
+@login_required
+def help_page():
+    return render_template('help.html')
+
+# Health check for Vercel
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()})
+
+# For Vercel deployment
+app.debug = False
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, host='0.0.0.0', port=5000) 

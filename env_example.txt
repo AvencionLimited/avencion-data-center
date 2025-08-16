@@ -1,13 +1,14 @@
-# Database Manager Configuration
-SECRET_KEY=your-super-secret-key-here
-DATABASE_URL=sqlite:///db_manager.db
-
-# PostgreSQL Configuration (for production)
-# DATABASE_URL=postgresql://username:password@localhost:5432/db_manager
+# Database Configuration
+# For Vercel deployment, use a PostgreSQL database (Supabase, Neon, Railway, etc.)
+DATABASE_URL=postgresql://username:password@host:port/database
 
 # Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=1
+SECRET_KEY=your-secret-key-here
+FLASK_ENV=production
+FLASK_DEBUG=0
+
+# Vercel Configuration
+VERCEL=1
 
 # Upload Configuration
 MAX_CONTENT_LENGTH=16777216 
