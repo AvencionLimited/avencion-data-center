@@ -47,7 +47,7 @@ def login_required(f):
 
 # Initialize database configuration
 def get_database_url():
-    """Get database URL with fallback to SQLite"""
+    """Get database URL with fallback to in-memory SQLite"""
     DATABASE_URL = os.environ.get('DATABASE_URL')
     if DATABASE_URL and 'postgresql://' in DATABASE_URL:
         # Check if psycopg2 is available
@@ -56,19 +56,17 @@ def get_database_url():
             print("✅ Configured for PostgreSQL database on Vercel")
             return DATABASE_URL
         except ImportError:
-            print("⚠️ PostgreSQL URL provided but psycopg2 not available, falling back to SQLite")
-            return 'sqlite:///:memory:'  # Use in-memory SQLite for Vercel
+            print("⚠️ PostgreSQL URL provided but psycopg2 not available, falling back to in-memory SQLite")
+            return 'sqlite:///:memory:'
     else:
         print("✅ Using in-memory SQLite database for Vercel")
-        return 'sqlite:///:memory:'  # Use in-memory SQLite for Vercel
+        return 'sqlite:///:memory:'
 
 # Create Flask app with proper configuration for Vercel
 app = Flask(__name__)
 
 # Configure Flask for Vercel's read-only file system
 if os.environ.get('VERCEL'):
-    # Use /tmp for writable files on Vercel
-    app.config['INSTANCE_PATH'] = '/tmp'
     # Disable instance path creation for SQLAlchemy
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,

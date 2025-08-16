@@ -1,150 +1,77 @@
 # Vercel Deployment Guide
 
-This guide will help you deploy your Flask application to Vercel.
+## Issue Resolution
 
-## Prerequisites
+The main issue was that Flask-SQLAlchemy was trying to create an instance directory in Vercel's read-only file system. This has been fixed by:
 
-1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
-2. **GitHub Repository**: Your code should be in a GitHub repository
-3. **PostgreSQL Database**: You'll need a PostgreSQL database (recommended: Supabase, Neon, or Railway)
+1. **Using in-memory SQLite**: The app now uses `sqlite:///:memory:` for Vercel deployments
+2. **Proper Flask configuration**: Added `SQLALCHEMY_ENGINE_OPTIONS` to prevent file system access
+3. **Error handling**: Added fallback configurations for SQLAlchemy initialization
+4. **Simplified app**: Created `app_vercel_simple.py` specifically for Vercel
 
-## Step 1: Set Up Database
+## Files Updated
 
-### Option A: Supabase (Recommended)
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Create a new project
-3. Go to Settings > Database to get your connection string
-4. Copy the connection string (it looks like: `postgresql://postgres:[password]@[host]:5432/postgres`)
+- ✅ `app_vercel_simple.py` - New simplified version for Vercel
+- ✅ `api/index.py` - Updated to use the simplified app
+- ✅ `requirements.txt` - Added PostgreSQL support
+- ✅ `requirements-vercel.txt` - Minimal requirements for Vercel
+- ✅ `vercel.json` - Proper configuration
 
-### Option B: Neon
-1. Go to [neon.tech](https://neon.tech) and create a free account
-2. Create a new project
-3. Copy the connection string from the dashboard
+## Deployment Steps
 
-## Step 2: Deploy to Vercel
-
-### Method 1: Using Vercel CLI
-1. Install Vercel CLI:
+1. **Push your changes to GitHub**:
    ```bash
-   npm i -g vercel
+   git add .
+   git commit -m "Fix Vercel deployment issues"
+   git push
    ```
 
-2. Login to Vercel:
-   ```bash
-   vercel login
-   ```
+2. **Redeploy on Vercel**:
+   - Go to your Vercel dashboard
+   - Select your project
+   - Click "Redeploy" or push new changes to trigger auto-deployment
 
-3. Deploy from your project directory:
-   ```bash
-   vercel
-   ```
+3. **Test the deployment**:
+   - Visit your Vercel URL
+   - Test the health check: `https://your-app.vercel.app/health`
+   - Test the simple route: `https://your-app.vercel.app/test`
 
-### Method 2: Using Vercel Dashboard
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Configure the project settings
+## Environment Variables
 
-## Step 3: Environment Variables
+Make sure you have these environment variables set in Vercel:
 
-In your Vercel project settings, add these environment variables:
+- `SECRET_KEY` - A random secret key for Flask sessions
+- `DATABASE_URL` - (Optional) PostgreSQL connection string
+- `VERCEL` - Set to "1" (automatically set by Vercel)
 
-```
-DATABASE_URL=postgresql://username:password@host:port/database
-SECRET_KEY=your-secret-key-here
-FLASK_ENV=production
-FLASK_DEBUG=0
-```
+## Database Configuration
 
-## Step 4: Configure Build Settings
-
-Vercel should automatically detect this as a Python project. The configuration is already set up in:
-- `vercel.json` - Project configuration
-- `api/index.py` - Entry point
-- `app_vercel.py` - Vercel-compatible Flask app
-
-## Step 5: Deploy
-
-1. Push your changes to GitHub
-2. Vercel will automatically deploy your application
-3. Your app will be available at `https://your-project-name.vercel.app`
-
-## Important Notes
-
-### File System Limitations
-- Vercel has a read-only file system
-- File uploads are not supported in this version
-- The app focuses on project and cohort management
-
-### Database Setup
-- The app will automatically create tables on first run
-- Make sure your database is accessible from Vercel's servers
-
-### Authentication
-- Default login: `Avencion` / `AvencionData@Center2025`
-- You can change these credentials in the code
+- **Local development**: Uses SQLite file database
+- **Vercel deployment**: Uses in-memory SQLite (data is not persistent)
+- **Production**: Use PostgreSQL with `DATABASE_URL` environment variable
 
 ## Troubleshooting
 
-### Common Issues
+If you still get errors:
 
-1. **Database Connection Error**
-   - Check your `DATABASE_URL` environment variable
-   - Ensure your database allows external connections
-   - Verify the database credentials
+1. **Check the logs**: Look at Vercel function logs for specific errors
+2. **Test health endpoint**: Visit `/health` to check database connection
+3. **Test simple endpoint**: Visit `/test` to verify Flask is running
+4. **Check requirements**: Ensure all dependencies are in `requirements.txt`
 
-2. **Build Failures**
-   - Check the build logs in Vercel dashboard
-   - Ensure all dependencies are in `requirements-simple.txt`
+## Notes
 
-3. **Runtime Errors**
-   - Check the function logs in Vercel dashboard
-   - Verify environment variables are set correctly
+- The in-memory SQLite database means data will be lost when the function restarts
+- For production use, set up a PostgreSQL database (Supabase, Neon, Railway, etc.)
+- File uploads are not supported on Vercel (read-only file system)
+- Sessions may not persist between function invocations
 
-### Getting Help
+## Success Indicators
 
-If you encounter issues:
-1. Check the Vercel deployment logs
-2. Verify your environment variables
-3. Test locally with the same database connection
+✅ App loads without 500 errors  
+✅ `/health` endpoint returns `{"status": "healthy"}`  
+✅ `/test` endpoint returns `{"status": "ok"}`  
+✅ Login page loads correctly  
+✅ Database operations work (with in-memory SQLite)  
 
-## Local Development
-
-To test locally with the same configuration:
-
-1. Create a `.env` file:
-   ```
-   DATABASE_URL=your-postgresql-connection-string
-   SECRET_KEY=your-secret-key
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements-simple.txt
-   ```
-
-3. Run the app:
-   ```bash
-   python app_vercel.py
-   ```
-
-## Features Available on Vercel
-
-✅ Project Management
-✅ Cohort Management  
-✅ User Authentication
-✅ Database Integration
-✅ Health Check Endpoint
-
-❌ File Uploads (not supported on Vercel)
-❌ Excel File Processing (requires file system access)
-
-## Next Steps
-
-After successful deployment:
-1. Test the login functionality
-2. Create a test project
-3. Add cohorts to your project
-4. Verify database connectivity
-
-Your Flask application is now deployed and ready to use! 
+Your Avencion Data Center should now deploy successfully on Vercel! 🚀 
