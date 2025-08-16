@@ -90,6 +90,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 try:
     db = SQLAlchemy(app)
     print("✅ SQLAlchemy initialized successfully")
+    
+    # Create tables immediately after initialization
+    with app.app_context():
+        try:
+            db.create_all()
+            print("✅ Database tables created successfully")
+        except Exception as e:
+            print(f"⚠️ Database table creation error: {e}")
+            print("🔄 Continuing without database tables")
+            
 except Exception as e:
     print(f"⚠️ SQLAlchemy initialization error: {e}")
     # Fallback: try to initialize without instance path
@@ -97,6 +107,14 @@ except Exception as e:
         app.config['INSTANCE_PATH'] = None
         db = SQLAlchemy(app)
         print("✅ SQLAlchemy initialized with fallback configuration")
+        
+        # Create tables with fallback configuration
+        with app.app_context():
+            try:
+                db.create_all()
+                print("✅ Database tables created with fallback configuration")
+            except Exception as e2:
+                print(f"⚠️ Fallback database table creation error: {e2}")
     else:
         raise e
 
@@ -194,6 +212,12 @@ def logout():
 def index():
     try:
         with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
             projects = Project.query.order_by(Project.created_at.desc()).all()
         return render_template('index.html', projects=projects)
     except Exception as e:
@@ -211,6 +235,12 @@ def new_project():
             created_by = request.form.get('created_by', 'Avencion')
             
             with app.app_context():
+                # Ensure tables exist before using them
+                try:
+                    db.create_all()
+                except:
+                    pass
+                
                 project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
                 db.session.add(project)
                 db.session.commit()
@@ -228,6 +258,12 @@ def new_project():
 def project_detail(project_id):
     try:
         with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
             project = Project.query.get_or_404(project_id)
         return render_template('project_detail.html', project=project)
     except Exception as e:
@@ -239,6 +275,12 @@ def project_detail(project_id):
 def new_cohort(project_id):
     try:
         with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
             project = Project.query.get_or_404(project_id)
         
         if request.method == 'POST':
@@ -264,6 +306,12 @@ def new_cohort(project_id):
 def cohort_detail(cohort_id):
     try:
         with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
             cohort = Cohort.query.get_or_404(cohort_id)
         return render_template('cohort_detail.html', cohort=cohort)
     except Exception as e:
@@ -279,12 +327,39 @@ def help_page():
         app.logger.error(f'Help error: {e}')
         return jsonify({'error': 'Help error', 'details': str(e)}), 500
 
+# Database initialization route
+@app.route('/init-db')
+def init_database():
+    try:
+        with app.app_context():
+            db.create_all()
+            return jsonify({
+                'status': 'success',
+                'message': 'Database tables created successfully',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+    except Exception as e:
+        app.logger.error(f'Database initialization error: {e}')
+        return jsonify({
+            'status': 'error',
+            'message': 'Failed to create database tables',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 500
+
 # Health check for Vercel
 @app.route('/health')
 def health_check():
     try:
-        # Test database connection
+        # Test database connection and ensure tables exist
         with app.app_context():
+            # Try to create tables if they don't exist
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # Test a simple query
             db.engine.execute('SELECT 1')
         return jsonify({
             'status': 'healthy', 
@@ -312,11 +387,12 @@ def test():
 app.debug = False
 
 if __name__ == '__main__':
+    # Ensure tables are created for local development
     with app.app_context():
         try:
             db.create_all()
-            print("✅ Database tables created successfully")
+            print("✅ Database tables created for local development")
         except Exception as e:
-            print(f"⚠️ Database initialization error: {e}")
+            print(f"⚠️ Local database initialization error: {e}")
             print("🔄 Continuing without database initialization")
     app.run(debug=True, host='0.0.0.0', port=5000) 
