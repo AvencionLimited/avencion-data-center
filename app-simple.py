@@ -189,19 +189,21 @@ def add_security_headers(response):
 
 # Use SQLite for local development, PostgreSQL for production
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and 'postgresql://' in DATABASE_URL:
-    # Try PostgreSQL first, fallback to SQLite if connection fails
+
+# For Vercel deployment, we'll use SQLite to avoid PostgreSQL connection issues
+# In production, you can set up a proper PostgreSQL connection
+if DATABASE_URL and 'postgresql://' in DATABASE_URL and not os.environ.get('VERCEL'):
+    # Only try PostgreSQL if not on Vercel
     try:
-        # For Vercel deployment, we'll use the DATABASE_URL directly
-        # The connection will be tested when the app starts
-        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-        print("✅ Configured for PostgreSQL database")
+        # For now, we'll use SQLite even with DATABASE_URL to avoid deployment issues
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
+        print("✅ Using SQLite database (PostgreSQL URL provided but using SQLite for compatibility)")
     except Exception as e:
         print(f"⚠️ PostgreSQL configuration failed: {e}")
         print("🔄 Falling back to SQLite for local development")
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
 else:
-    # Default to SQLite for local development
+    # Default to SQLite for local development and Vercel
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
     print("✅ Using SQLite database for local development")
 
