@@ -83,6 +83,9 @@ if os.environ.get('VERCEL'):
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # Session expires in 24 hours
 
+# Configure for larger payloads (for Vercel)
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB max payload size
+
 # Security headers
 @app.after_request
 def add_security_headers(response):
@@ -473,6 +476,115 @@ def edit_database(database_id):
     except Exception as e:
         app.logger.error(f'Edit database error: {e}')
         return jsonify({'error': 'Edit database error', 'details': str(e)}), 500
+
+# Spreadsheet routes (simplified for Vercel)
+@app.route('/spreadsheet/create/<int:cohort_id>', methods=['GET', 'POST'])
+@login_required
+def create_spreadsheet(cohort_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('Spreadsheet creation not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=cohort_id))
+    except Exception as e:
+        app.logger.error(f'Create spreadsheet error: {e}')
+        return jsonify({'error': 'Create spreadsheet error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/upload/<int:cohort_id>', methods=['GET', 'POST'])
+@login_required
+def upload_spreadsheet(cohort_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('File upload not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=cohort_id))
+    except Exception as e:
+        app.logger.error(f'Upload spreadsheet error: {e}')
+        return jsonify({'error': 'Upload spreadsheet error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>')
+@login_required
+def spreadsheet_detail(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('Spreadsheet details not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Spreadsheet detail error: {e}')
+        return jsonify({'error': 'Spreadsheet detail error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>/view')
+@login_required
+def view_spreadsheet(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('Spreadsheet viewing not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'View spreadsheet error: {e}')
+        return jsonify({'error': 'View spreadsheet error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>/download')
+@login_required
+def download_spreadsheet(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('File download not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Download spreadsheet error: {e}')
+        return jsonify({'error': 'Download spreadsheet error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>/recreate', methods=['POST'])
+@login_required
+def recreate_spreadsheet(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to cohort detail
+            flash('Spreadsheet recreation not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Recreate spreadsheet error: {e}')
+        return jsonify({'error': 'Recreate spreadsheet error', 'details': str(e)}), 500
 
 @app.route('/help')
 @login_required
