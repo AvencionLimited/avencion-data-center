@@ -192,14 +192,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL and 'postgresql://' in DATABASE_URL:
     # Try PostgreSQL first, fallback to SQLite if connection fails
     try:
-        import psycopg2
-        # Test connection
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.close()
+        # For Vercel deployment, we'll use the DATABASE_URL directly
+        # The connection will be tested when the app starts
         app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-        print("✅ Connected to PostgreSQL database")
+        print("✅ Configured for PostgreSQL database")
     except Exception as e:
-        print(f"⚠️ PostgreSQL connection failed: {e}")
+        print(f"⚠️ PostgreSQL configuration failed: {e}")
         print("🔄 Falling back to SQLite for local development")
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
 else:
