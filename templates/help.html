@@ -1,0 +1,721 @@
+{% extends "base.html" %}
+
+{% block title %}Help - Avencion Data Center{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-3xl shadow-2xl p-8 mb-8 text-white">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
+                <i class="fas fa-question-circle text-3xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-4">Avencion Data Center Help</h1>
+            <p class="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+                Your complete guide to mastering data management and analysis. From basic setup to advanced features, 
+                everything you need to know is right here.
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Navigation Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <a href="#getting-started" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-rocket text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Getting Started</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Master the basics of creating projects and organizing your data workflow</p>
+            <div class="mt-4 flex items-center text-blue-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+
+        <a href="#projects" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-folder text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Projects</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Create and manage projects to organize your data workflows effectively</p>
+            <div class="mt-4 flex items-center text-green-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+
+        <a href="#spreadsheets" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-table text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Spreadsheets</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Upload, edit, and analyze Excel files with advanced features</p>
+            <div class="mt-4 flex items-center text-purple-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+
+        <a href="#online-editor" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-edit text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Online Editor</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Advanced Excel-like editing with formulas and professional formatting</p>
+            <div class="mt-4 flex items-center text-indigo-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+
+        <a href="#databases" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-database text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Databases</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Connect and manage various database types seamlessly</p>
+            <div class="mt-4 flex items-center text-orange-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+
+        <a href="#tips-tricks" class="group bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 transform">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-lightbulb text-white text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Tips & Tricks</h3>
+            </div>
+            <p class="text-gray-600 leading-relaxed">Pro tips and best practices for efficient data management</p>
+            <div class="mt-4 flex items-center text-yellow-600 font-semibold">
+                <span>Learn More</span>
+                <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+            </div>
+        </a>
+    </div>
+
+    <!-- Getting Started Section -->
+    <div id="getting-started" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-6">
+                <i class="fas fa-rocket text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Getting Started</h2>
+                <p class="text-gray-600 text-lg mt-2">Master the basics and set up your first project</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center mr-3">
+                        <span class="text-white font-bold text-lg">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Create Your First Project</h3>
+                </div>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                        Click "Create New Project" on the dashboard
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                        Enter a project name and description
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                        Select the project type (Education, Research, Business, etc.)
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                        Add your name as the creator for attribution
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                        Click "Create Project"
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center mr-3">
+                        <span class="text-white font-bold text-lg">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Organize with Cohorts</h3>
+                </div>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                        Open your project and click "Create New Cohort"
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                        Name your cohort (e.g., "Q1 Data", "Student Records")
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                        Add a description explaining the cohort's purpose
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                        Include your name as the creator
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center mr-3">
+                        <span class="text-white font-bold text-lg">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">Upload Your Data</h3>
+                </div>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                        Navigate to a cohort and click "Upload Spreadsheet"
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                        Select your Excel file (.xlsx or .xls)
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                        Provide a name and creator information
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                        The system will automatically analyze your data
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div id="projects" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mr-6">
+                <i class="fas fa-folder text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Projects</h2>
+                <p class="text-gray-600 text-lg mt-2">Organize your data with powerful project management</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-tasks text-green-600 mr-3"></i>
+                        Project Management
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-eye text-green-600 mr-3 mt-1"></i>
+                            <strong>Dashboard View:</strong> See all projects with creation dates and types
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-search text-green-600 mr-3 mt-1"></i>
+                            <strong>Search & Filter:</strong> Find projects quickly using the search bar
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-info-circle text-green-600 mr-3 mt-1"></i>
+                            <strong>Project Details:</strong> View cohorts, databases, and statistics
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-edit text-green-600 mr-3 mt-1"></i>
+                            <strong>Edit & Delete:</strong> Modify project information or remove projects
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-tags text-green-600 mr-3"></i>
+                        Project Types
+                    </h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200">
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-graduation-cap text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Education</div>
+                                <div class="text-sm text-gray-600">Student records, academic data, research studies</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200">
+                            <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-flask text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Research</div>
+                                <div class="text-sm text-gray-600">Scientific data, surveys, experiments</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center p-3 bg-white rounded-xl border border-gray-200">
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-briefcase text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-gray-900">Business</div>
+                                <div class="text-sm text-gray-600">Sales data, customer records, financial reports</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spreadsheets Section -->
+    <div id="spreadsheets" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mr-6">
+                <i class="fas fa-table text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Spreadsheets</h2>
+                <p class="text-gray-600 text-lg mt-2">Powerful Excel file management and analysis</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-upload text-purple-600 mr-3"></i>
+                        Uploading Spreadsheets
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Supported Formats:</strong> .xlsx and .xls files
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Automatic Analysis:</strong> System detects columns, data types, and structure
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Smart Headers:</strong> Automatically identifies column headers
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Data Cleaning:</strong> Removes empty rows and columns
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Creator Tracking:</strong> Include your name for attribution
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-eye text-blue-600 mr-3"></i>
+                        Viewing Spreadsheets
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                            <strong>Summary View:</strong> See column information and sample data
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                            <strong>Full Data View:</strong> Browse all rows and columns
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                            <strong>Search Function:</strong> Find specific data quickly
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                            <strong>Download:</strong> Get the original file back
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Editor Section -->
+    <div id="online-editor" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-6">
+                <i class="fas fa-edit text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Online Spreadsheet Editor</h2>
+                <p class="text-gray-600 text-lg mt-2">Professional Excel-like editing with advanced features</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-6">
+                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-mouse-pointer text-indigo-600 mr-3"></i>
+                        Excel-like Interface
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-600 mr-3 mt-1"></i>
+                            <strong>Cell Navigation:</strong> Use arrow keys, Tab, and Enter to move between cells
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-600 mr-3 mt-1"></i>
+                            <strong>Formula Support:</strong> Use =SUM(), =AVERAGE(), =COUNT(), etc.
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-600 mr-3 mt-1"></i>
+                            <strong>Auto-save:</strong> Changes are automatically saved
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-600 mr-3 mt-1"></i>
+                            <strong>Real-time Updates:</strong> See formula results immediately
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-palette text-green-600 mr-3"></i>
+                        Formatting Tools
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                            <strong>Text Formatting:</strong> Bold, italic, underline, strikethrough
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                            <strong>Alignment:</strong> Left, center, right alignment
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                            <strong>Number Formatting:</strong> Currency, percentage, date, number formats
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                            <strong>Cell Highlighting:</strong> Color-code cells for better organization
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-calculator text-purple-600 mr-3"></i>
+                        Advanced Functions
+                    </h3>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Math Functions:</strong> SUM, AVERAGE, COUNT, MAX, MIN
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Text Functions:</strong> CONCATENATE, LEN, UPPER, LOWER
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Cell References:</strong> Use A1, B2, etc. in formulas
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-purple-600 mr-3 mt-1"></i>
+                            <strong>Range Support:</strong> Use A1:B10 for ranges
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-keyboard text-orange-600 mr-3"></i>
+                        Keyboard Shortcuts
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-white rounded-lg p-3 border border-orange-200">
+                            <div class="font-semibold text-gray-900">Navigation</div>
+                            <div class="text-gray-600">Arrow keys, Tab, Enter</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-orange-200">
+                            <div class="font-semibold text-gray-900">Editing</div>
+                            <div class="text-gray-600">F2 to edit, Ctrl+C/V/X</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-orange-200">
+                            <div class="font-semibold text-gray-900">Formatting</div>
+                            <div class="text-gray-600">Ctrl+B, Ctrl+I, Ctrl+U</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 border border-orange-200">
+                            <div class="font-semibold text-gray-900">Formulas</div>
+                            <div class="text-gray-600">Alt+= for auto sum</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips & Tricks Section -->
+    <div id="tips-tricks" class="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mr-6">
+                <i class="fas fa-lightbulb text-white text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-gray-900">Tips & Tricks</h2>
+                <p class="text-gray-600 text-lg mt-2">Pro tips for efficient data management</p>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-star text-blue-600 mr-3"></i>
+                    Best Practices
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                        Always include your name when creating items
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                        Use descriptive names for projects and cohorts
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                        Organize data logically using cohorts
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                        Save frequently when editing spreadsheets
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-blue-600 mr-3 mt-1"></i>
+                        Use formulas for calculations
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-bolt text-green-600 mr-3"></i>
+                    Efficiency Tips
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        Use keyboard shortcuts for faster navigation
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        Leverage the search function to find data quickly
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        Use cell highlighting to visually organize data
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        Create tables for better data presentation
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-green-600 mr-3 mt-1"></i>
+                        Use number formatting to make data readable
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-sitemap text-purple-600 mr-3"></i>
+                    Data Organization
+                </h3>
+                <ul class="space-y-3 text-gray-700">
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-purple-600 mr-3 mt-1"></i>
+                        Plan your structure before creating projects
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-purple-600 mr-3 mt-1"></i>
+                        Use consistent naming conventions
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-purple-600 mr-3 mt-1"></i>
+                        Group related data in the same cohort
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-purple-600 mr-3 mt-1"></i>
+                        Keep projects focused on specific purposes
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check text-purple-600 mr-3 mt-1"></i>
+                        Document your data with clear descriptions
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Section -->
+    <div class="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-3xl shadow-2xl p-8 text-white">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
+                <i class="fas fa-headset text-2xl text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-4">Need More Help?</h2>
+            <p class="text-xl text-blue-100 max-w-3xl mx-auto leading-relaxed mb-8">
+                You're now equipped with everything you need to master the Avencion Data Center. 
+                From basic setup to advanced features, you have the tools to succeed.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                    <h3 class="text-xl font-bold mb-4">Platform Features</h3>
+                    <ul class="space-y-2 text-blue-100">
+                        <li class="flex items-center">
+                            <i class="fas fa-shield-alt mr-3"></i>
+                            Secure authentication system
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-brain mr-3"></i>
+                            Automatic data analysis
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-edit mr-3"></i>
+                            Excel-like online editor
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-calculator mr-3"></i>
+                            Formula calculation engine
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-palette mr-3"></i>
+                            Professional formatting tools
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-user mr-3"></i>
+                            Creator attribution tracking
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                    <h3 class="text-xl font-bold mb-4">Getting Started Checklist</h3>
+                    <ul class="space-y-2 text-blue-100">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Create your first project
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Add a cohort to organize data
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Upload or create a spreadsheet
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Try the online editor
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Experiment with formulas
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle mr-3 text-green-300"></i>
+                            Use formatting tools
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                <p class="text-center text-lg">
+                    <strong>Avencion Data Center</strong> - Your comprehensive solution for data management and analysis.
+                    <br>Built for professionals who need powerful, yet simple data tools.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+</style>
+
+<script>
+// Add smooth scrolling and active section highlighting
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.group');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %} 

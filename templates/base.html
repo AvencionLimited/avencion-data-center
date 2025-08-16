@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Avencion Data Center{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="bg-blue-600 w-64 flex-shrink-0 hidden md:block shadow-xl">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-8">
+                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-database text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-white text-xl font-bold">Avencion</h1>
+                        <p class="text-white/80 text-sm">Data Center</p>
+                    </div>
+                </div>
+                
+                <nav class="space-y-2">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3 px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 group">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-home text-white"></i>
+                        </div>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('new_project') }}" class="flex items-center space-x-3 px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 group">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-plus text-white"></i>
+                        </div>
+                        <span class="font-medium">New Project</span>
+                    </a>
+                    <a href="{{ url_for('help_page') }}" class="flex items-center space-x-3 px-4 py-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 group">
+                        <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-question-circle text-white"></i>
+                        </div>
+                        <span class="font-medium">Help</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Top bar -->
+            <div class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between px-8 py-6">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-3xl font-bold text-gray-900">{% block page_title %}Dashboard{% endblock %}</h1>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-xl">
+                            <span class="font-semibold text-gray-800">{{ session.username }}</span>
+                            <span class="mx-2 text-gray-400">•</span>
+                            <span class="text-gray-600">Data Center</span>
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="inline-flex items-center px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-xl hover:bg-red-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content area -->
+            <div class="flex-1 p-8 bg-gray-50">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mb-8 space-y-4">
+                            {% for category, message in messages %}
+                                <div class="bg-{{ 'red' if category == 'error' else 'green' }}-50 border border-{{ 'red' if category == 'error' else 'green' }}-200 rounded-2xl p-6 shadow-sm">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 bg-{{ 'red' if category == 'error' else 'green' }}-100 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} text-{{ 'red' if category == 'error' else 'green' }}-600 text-lg"></i>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p class="text-sm font-semibold text-{{ 'red' if category == 'error' else 'green' }}-800">{{ message }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

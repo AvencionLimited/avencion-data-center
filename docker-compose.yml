@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://dbmanager:password@db:5432/db_manager
+      - SECRET_KEY=your-super-secret-key-change-this
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=db_manager
+      - POSTGRES_USER=dbmanager
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_data: 

@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Add Database - Database Manager{% endblock %}
+{% block page_title %}Add Database to {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Database Configuration</h2>
+            <p class="text-sm text-gray-600 mt-1">Add a new database connection to your project</p>
+        </div>
+        
+        <div class="p-6">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Database Name *</label>
+                        <input type="text" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               id="name" 
+                               name="name" 
+                               required 
+                               placeholder="Enter database name">
+                        <p class="mt-1 text-sm text-gray-500">Give your database a descriptive name</p>
+                    </div>
+                    
+                    <div>
+                        <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Database Type *</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                id="type" 
+                                name="type" 
+                                required 
+                                onchange="toggleFormFields()">
+                            <option value="">Select database type</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="access">Microsoft Access (.mdb/.accdb)</option>
+                            <option value="excel">Excel File (.xlsx/.xls)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- PostgreSQL Connection Fields -->
+                    <div id="postgresql-fields" class="hidden space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="host" class="block text-sm font-medium text-gray-700 mb-2">Host *</label>
+                                <input type="text" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                       id="host" 
+                                       name="host" 
+                                       placeholder="localhost">
+                            </div>
+                            <div>
+                                <label for="port" class="block text-sm font-medium text-gray-700 mb-2">Port *</label>
+                                <input type="text" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                       id="port" 
+                                       name="port" 
+                                       placeholder="5432">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="database" class="block text-sm font-medium text-gray-700 mb-2">Database Name *</label>
+                                <input type="text" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                       id="database" 
+                                       name="database" 
+                                       placeholder="Enter database name">
+                            </div>
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+                                <input type="text" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                       id="username" 
+                                       name="username" 
+                                       placeholder="Enter username">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                            <input type="password" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Enter password">
+                        </div>
+                    </div>
+                    
+                    <!-- File Upload Fields -->
+                    <div id="file-fields" class="hidden">
+                        <div>
+                            <label for="file" class="block text-sm font-medium text-gray-700 mb-2">Upload File *</label>
+                            <input type="file" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   id="file" 
+                                   name="file" 
+                                   accept=".mdb,.accdb,.xlsx,.xls">
+                            <p class="mt-1 text-sm text-gray-500">
+                                <span id="file-help">Select a file to upload</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Excel Options -->
+                    <div id="excel-options" class="hidden">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Excel File Options</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input type="radio" 
+                                           id="upload-excel" 
+                                           name="excel_option" 
+                                           value="upload" 
+                                           checked
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                           onchange="toggleExcelOptions()">
+                                    <label for="upload-excel" class="ml-3 block text-sm font-medium text-gray-700">
+                                        <i class="fas fa-upload text-blue-600 mr-1"></i> Upload Existing Excel File
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" 
+                                           id="create-excel" 
+                                           name="excel_option" 
+                                           value="create" 
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                           onchange="toggleExcelOptions()">
+                                    <label for="create-excel" class="ml-3 block text-sm font-medium text-gray-700">
+                                        <i class="fas fa-plus text-green-600 mr-1"></i> Create New Excel Spreadsheet
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Excel Creation Fields -->
+                    <div id="excel-creation-fields" class="hidden">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-info-circle text-blue-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-blue-800">
+                                        <strong>Create New Excel Spreadsheet:</strong> Choose this option to create a brand new Excel file with formulas and online editing capabilities.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="rows" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-list-ol text-blue-600 mr-1"></i> Number of Rows
+                                </label>
+                                <input type="number" 
+                                       id="rows" 
+                                       name="rows" 
+                                       min="1" 
+                                       max="1000" 
+                                       value="10"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Maximum 1000 rows</p>
+                            </div>
+                            
+                            <div>
+                                <label for="cols" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-columns text-purple-600 mr-1"></i> Number of Columns
+                                </label>
+                                <input type="number" 
+                                       id="cols" 
+                                       name="cols" 
+                                       min="1" 
+                                       max="26" 
+                                       value="10"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Maximum 26 columns (A-Z)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-6">
+                        <a href="{{ url_for('project_detail', project_id=project.id) }}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Database
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleFormFields() {
+    const type = document.getElementById('type').value;
+    const postgresqlFields = document.getElementById('postgresql-fields');
+    const fileFields = document.getElementById('file-fields');
+    const excelOptions = document.getElementById('excel-options');
+    const excelCreationFields = document.getElementById('excel-creation-fields');
+    const fileHelp = document.getElementById('file-help');
+    
+    // Hide all fields first
+    postgresqlFields.classList.add('hidden');
+    fileFields.classList.add('hidden');
+    excelOptions.classList.add('hidden');
+    excelCreationFields.classList.add('hidden');
+    
+    // Show relevant fields based on type
+    if (type === 'postgresql') {
+        postgresqlFields.classList.remove('hidden');
+    } else if (type === 'access') {
+        fileFields.classList.remove('hidden');
+        fileHelp.textContent = 'Upload a Microsoft Access database file (.mdb or .accdb)';
+        document.getElementById('file').accept = '.mdb,.accdb';
+    } else if (type === 'excel') {
+        fileFields.classList.remove('hidden');
+        excelOptions.classList.remove('hidden');
+        fileHelp.textContent = 'Upload an Excel file (.xlsx or .xls)';
+        document.getElementById('file').accept = '.xlsx,.xls';
+        toggleExcelOptions(); // Initialize Excel options
+    }
+}
+
+function toggleExcelOptions() {
+    const uploadOption = document.getElementById('upload-excel');
+    const createOption = document.getElementById('create-excel');
+    const fileFields = document.getElementById('file-fields');
+    const excelCreationFields = document.getElementById('excel-creation-fields');
+    
+    if (uploadOption.checked) {
+        fileFields.classList.remove('hidden');
+        excelCreationFields.classList.add('hidden');
+        document.getElementById('file').required = true;
+        document.getElementById('rows').required = false;
+        document.getElementById('cols').required = false;
+    } else if (createOption.checked) {
+        fileFields.classList.add('hidden');
+        excelCreationFields.classList.remove('hidden');
+        document.getElementById('file').required = false;
+        document.getElementById('rows').required = true;
+        document.getElementById('cols').required = true;
+    }
+}
+</script>
+{% endblock %} 
