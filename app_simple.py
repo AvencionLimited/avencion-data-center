@@ -10,8 +10,11 @@ import warnings
 import hashlib
 import secrets
 from collections import defaultdict
-from datetime import datetime, timedelta
+from dotenv import load_dotenv
 warnings.filterwarnings('ignore', category=FutureWarning)
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Rate limiting for login attempts
 login_attempts = defaultdict(list)
@@ -189,14 +192,12 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL and 'postgresql://' in DATABASE_URL:
     # Try PostgreSQL first, fallback to SQLite if connection fails
     try:
-        import psycopg2
-        # Test connection
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.close()
+        # For Vercel deployment, we'll use the DATABASE_URL directly
+        # The connection will be tested when the app starts
         app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-        print("✅ Connected to PostgreSQL database")
+        print("✅ Configured for PostgreSQL database")
     except Exception as e:
-        print(f"⚠️ PostgreSQL connection failed: {e}")
+        print(f"⚠️ PostgreSQL configuration failed: {e}")
         print("🔄 Falling back to SQLite for local development")
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
 else:
@@ -219,6 +220,7 @@ class Project(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     project_type = db.Column(db.String(50), nullable=False, default='other')  # e.g., 'education', 'research', 'business'
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')  # Creator signature
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     cohorts = db.relationship('Cohort', backref='project', lazy=True, cascade='all, delete-orphan')
@@ -228,6 +230,7 @@ class Cohort(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')  # Creator signature
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -241,6 +244,7 @@ class Spreadsheet(db.Model):
     sheet_names = db.Column(db.Text)  # JSON array of sheet names
     columns_info = db.Column(db.Text)  # JSON object with column information
     row_count = db.Column(db.Integer, default=0)
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')  # Creator signature
     cohort_id = db.Column(db.Integer, db.ForeignKey('cohort.id'), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -251,6 +255,7 @@ class Database(db.Model):
     type = db.Column(db.String(20), nullable=False)  # postgresql, access, excel
     connection_string = db.Column(db.Text)
     file_path = db.Column(db.String(500))
+    created_by = db.Column(db.String(100), nullable=False, default='Avencion')  # Creator signature
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -267,11 +272,11 @@ def migrate_database():
     """Migrate existing database to new schema"""
     try:
         with app.app_context():
-            # Check if project_type column exists
             inspector = db.inspect(db.engine)
-            columns = [col['name'] for col in inspector.get_columns('project')]
             
-            if 'project_type' not in columns:
+            # Check and add project_type column
+            project_columns = [col['name'] for col in inspector.get_columns('project')]
+            if 'project_type' not in project_columns:
                 print("Adding project_type column to existing projects...")
                 if 'postgresql' in app.config['SQLALCHEMY_DATABASE_URI']:
                     with db.engine.connect() as conn:
@@ -281,9 +286,26 @@ def migrate_database():
                     with db.engine.connect() as conn:
                         conn.execute(db.text('ALTER TABLE project ADD COLUMN project_type VARCHAR(50) DEFAULT "other"'))
                         conn.commit()
-                print("Migration completed successfully!")
-            else:
-                print("Database schema is up to date.")
+            
+            # Check and add created_by columns
+            tables_to_check = ['project', 'cohort', 'spreadsheet', 'database']
+            for table in tables_to_check:
+                try:
+                    table_columns = [col['name'] for col in inspector.get_columns(table)]
+                    if 'created_by' not in table_columns:
+                        print(f"Adding created_by column to existing {table}...")
+                        if 'postgresql' in app.config['SQLALCHEMY_DATABASE_URI']:
+                            with db.engine.connect() as conn:
+                                conn.execute(db.text(f'ALTER TABLE {table} ADD COLUMN created_by VARCHAR(100) DEFAULT \'Avencion\''))
+                                conn.commit()
+                        else:
+                            with db.engine.connect() as conn:
+                                conn.execute(db.text(f'ALTER TABLE {table} ADD COLUMN created_by VARCHAR(100) DEFAULT "Avencion"'))
+                                conn.commit()
+                except Exception as e:
+                    print(f"Error adding created_by to {table}: {e}")
+            
+            print("Migration completed successfully!")
                 
     except Exception as e:
         print(f"Migration error: {e}")
@@ -518,6 +540,11 @@ def logout():
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('login'))
 
+@app.route('/help')
+@login_required
+def help_page():
+    return render_template('help.html')
+
 # Routes
 @app.route('/')
 @login_required
@@ -532,8 +559,9 @@ def new_project():
         name = request.form['name']
         description = request.form['description']
         project_type = request.form['project_type']
+        created_by = request.form.get('created_by', 'Avencion')
         
-        project = Project(name=name, description=description, project_type=project_type)
+        project = Project(name=name, description=description, project_type=project_type, created_by=created_by)
         db.session.add(project)
         db.session.commit()
         
@@ -556,8 +584,9 @@ def new_cohort(project_id):
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
+        created_by = request.form.get('created_by', 'Avencion')
         
-        cohort = Cohort(name=name, description=description, project_id=project_id)
+        cohort = Cohort(name=name, description=description, project_id=project_id, created_by=created_by)
         db.session.add(cohort)
         db.session.commit()
         
@@ -604,7 +633,8 @@ def upload_spreadsheet(cohort_id):
                     sheet_names=json.dumps(columns_info.get('sheets', []), cls=DateTimeEncoder),
                     columns_info=json.dumps(columns_info, cls=DateTimeEncoder),
                     row_count=row_count,
-                    cohort_id=cohort_id
+                    cohort_id=cohort_id,
+                    created_by=request.form.get('created_by', 'Avencion')
                 )
                 
                 db.session.add(spreadsheet)
@@ -642,8 +672,50 @@ def view_spreadsheet(spreadsheet_id):
     sheet_name = request.args.get('sheet', '')
     
     try:
-        # Read the Excel file using openpyxl
-        wb = openpyxl.load_workbook(spreadsheet.file_path, data_only=True)
+        # Check if file exists
+        if not os.path.exists(spreadsheet.file_path):
+            flash('Spreadsheet file not found. The file may have been moved or deleted.', 'error')
+            return redirect(url_for('spreadsheet_detail', spreadsheet_id=spreadsheet_id))
+        
+        # Read the Excel file using openpyxl with better error handling
+        try:
+            wb = openpyxl.load_workbook(spreadsheet.file_path, data_only=True)
+        except Exception as excel_error:
+            # Try to recreate the file if it's corrupted
+            try:
+                flash(f'Excel file appears to be corrupted. Attempting to recreate...', 'warning')
+                
+                # Create a new Excel file
+                wb = openpyxl.Workbook()
+                ws = wb.active
+                ws.title = "Sheet1"
+                
+                # Add some default data
+                for col in range(1, 11):  # 10 columns
+                    ws.cell(row=1, column=col, value=openpyxl.utils.get_column_letter(col))
+                
+                # Save the new file
+                wb.save(spreadsheet.file_path)
+                
+                # Update the spreadsheet record
+                spreadsheet.row_count = 10
+                columns_info = {
+                    'columns': [openpyxl.utils.get_column_letter(i) for i in range(1, 11)],
+                    'total_rows': 10,
+                    'sheets': ['Sheet1']
+                }
+                spreadsheet.columns_info = json.dumps(columns_info, cls=DateTimeEncoder)
+                spreadsheet.updated_at = datetime.utcnow()
+                db.session.commit()
+                
+                flash('Spreadsheet recreated successfully! You can now edit it online.', 'success')
+                
+                # Reload the workbook
+                wb = openpyxl.load_workbook(spreadsheet.file_path, data_only=True)
+                
+            except Exception as recreate_error:
+                flash(f'Failed to recreate spreadsheet: {str(recreate_error)}. Please delete and re-upload the file.', 'error')
+                return redirect(url_for('spreadsheet_detail', spreadsheet_id=spreadsheet_id))
         available_sheets = wb.sheetnames
         
         if not sheet_name or sheet_name not in available_sheets:
@@ -996,7 +1068,8 @@ def new_database(project_id):
                 name=name,
                 type=db_type,
                 connection_string=connection_string,
-                project_id=project_id
+                project_id=project_id,
+                created_by=request.form.get('created_by', 'Avencion')
             )
             
         elif db_type == 'access':
@@ -1018,7 +1091,8 @@ def new_database(project_id):
                     name=name,
                     type=db_type,
                     file_path=file_path,
-                    project_id=project_id
+                    project_id=project_id,
+                    created_by=request.form.get('created_by', 'Avencion')
                 )
         
         elif db_type == 'excel':
@@ -1044,7 +1118,8 @@ def new_database(project_id):
                         name=name,
                         type=db_type,
                         file_path=file_path,
-                        project_id=project_id
+                        project_id=project_id,
+                        created_by=request.form.get('created_by', 'Avencion')
                     )
             
             elif excel_option == 'create':
@@ -1074,7 +1149,8 @@ def new_database(project_id):
                     name=name,
                     type=db_type,
                     file_path=file_path,
-                    project_id=project_id
+                    project_id=project_id,
+                    created_by=request.form.get('created_by', 'Avencion')
                 )
         
         db.session.add(database_obj)
