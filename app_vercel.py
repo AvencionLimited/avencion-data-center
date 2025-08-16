@@ -59,19 +59,28 @@ def add_security_headers(response):
     response.headers['Pragma'] = 'no-cache'
     return response
 
-# Use PostgreSQL for Vercel deployment, fallback to SQLite
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL and 'postgresql://' in DATABASE_URL:
-    # For Vercel deployment, use the DATABASE_URL directly
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-    print("✅ Configured for PostgreSQL database on Vercel")
-else:
-    # Fallback to SQLite for local development
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db_manager.db'
-    print("✅ Using SQLite database for local development")
+# Initialize database configuration
+def get_database_url():
+    """Get database URL with fallback to SQLite"""
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL and 'postgresql://' in DATABASE_URL:
+        # Check if psycopg2 is available
+        try:
+            import psycopg2
+            print("✅ Configured for PostgreSQL database on Vercel")
+            return DATABASE_URL
+        except ImportError:
+            print("⚠️ PostgreSQL URL provided but psycopg2 not available, falling back to SQLite")
+            return 'sqlite:///db_manager.db'
+    else:
+        print("✅ Using SQLite database for local development")
+        return 'sqlite:///db_manager.db'
 
+# Set database URL
+app.config['SQLALCHEMY_DATABASE_URI'] = get_database_url()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
 # Models
