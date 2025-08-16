@@ -333,6 +333,96 @@ def cohort_detail(cohort_id):
         app.logger.error(f'Cohort detail error: {e}')
         return jsonify({'error': 'Cohort detail error', 'details': str(e)}), 500
 
+# Edit routes
+@app.route('/project/<int:project_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_project(project_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            project = Project.query.get_or_404(project_id)
+            
+            if request.method == 'POST':
+                project.name = request.form['name']
+                project.project_type = request.form['project_type']
+                project.description = request.form.get('description', '')
+                
+                db.session.commit()
+                flash('Project updated successfully!', 'success')
+                return redirect(url_for('project_detail', project_id=project.id))
+            
+        return render_template('edit_project.html', project=project)
+    except Exception as e:
+        app.logger.error(f'Edit project error: {e}')
+        return jsonify({'error': 'Edit project error', 'details': str(e)}), 500
+
+@app.route('/cohort/<int:cohort_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_cohort(cohort_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            cohort = Cohort.query.get_or_404(cohort_id)
+            
+            if request.method == 'POST':
+                cohort.name = request.form['name']
+                cohort.description = request.form.get('description', '')
+                
+                db.session.commit()
+                flash('Cohort updated successfully!', 'success')
+                return redirect(url_for('cohort_detail', cohort_id=cohort.id))
+            
+        return render_template('edit_cohort.html', cohort=cohort)
+    except Exception as e:
+        app.logger.error(f'Edit cohort error: {e}')
+        return jsonify({'error': 'Edit cohort error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_spreadsheet(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to detail page
+            flash('Edit functionality not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Edit spreadsheet error: {e}')
+        return jsonify({'error': 'Edit spreadsheet error', 'details': str(e)}), 500
+
+@app.route('/spreadsheet/<int:spreadsheet_id>/edit-online')
+@login_required
+def edit_spreadsheet_online(spreadsheet_id):
+    try:
+        with app.app_context():
+            # Ensure tables exist before querying
+            try:
+                db.create_all()
+            except:
+                pass
+            
+            # For simplified version, just redirect to detail page
+            flash('Online editing not available in simplified version', 'info')
+            return redirect(url_for('cohort_detail', cohort_id=1))  # Fallback
+    except Exception as e:
+        app.logger.error(f'Edit spreadsheet online error: {e}')
+        return jsonify({'error': 'Edit spreadsheet online error', 'details': str(e)}), 500
+
 @app.route('/help')
 @login_required
 def help_page():
