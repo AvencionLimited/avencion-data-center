@@ -207,7 +207,8 @@ def logout():
 def index():
     try:
         with app.app_context():
-            projects = Project.query.order_by(Project.created_at.desc()).all()
+            # Use eager loading to prevent lazy loading issues
+            projects = Project.query.options(db.joinedload(Project.cohorts)).order_by(Project.created_at.desc()).all()
         return render_template('index.html', projects=projects)
     except Exception as e:
         app.logger.error(f'Index error: {e}')
@@ -241,7 +242,8 @@ def new_project():
 def project_detail(project_id):
     try:
         with app.app_context():
-            project = Project.query.get_or_404(project_id)
+            # Use eager loading to prevent lazy loading issues
+            project = Project.query.options(db.joinedload(Project.cohorts)).get_or_404(project_id)
         return render_template('project_detail.html', project=project)
     except Exception as e:
         app.logger.error(f'Project detail error: {e}')
@@ -252,7 +254,8 @@ def project_detail(project_id):
 def new_cohort(project_id):
     try:
         with app.app_context():
-            project = Project.query.get_or_404(project_id)
+            # Use eager loading to prevent lazy loading issues
+            project = Project.query.options(db.joinedload(Project.cohorts)).get_or_404(project_id)
         
         if request.method == 'POST':
             name = request.form['name']
@@ -277,7 +280,8 @@ def new_cohort(project_id):
 def cohort_detail(cohort_id):
     try:
         with app.app_context():
-            cohort = Cohort.query.get_or_404(cohort_id)
+            # Use eager loading to prevent lazy loading issues
+            cohort = Cohort.query.options(db.joinedload(Cohort.project)).get_or_404(cohort_id)
         return render_template('cohort_detail.html', cohort=cohort)
     except Exception as e:
         app.logger.error(f'Cohort detail error: {e}')
@@ -320,6 +324,12 @@ def test():
         'message': 'Flask app is running',
         'timestamp': datetime.utcnow().isoformat()
     })
+
+# Favicon route to prevent 404 errors
+@app.route('/favicon.ico')
+@app.route('/favicon.png')
+def favicon():
+    return '', 204  # No content response
 
 # For Vercel deployment
 app.debug = False
